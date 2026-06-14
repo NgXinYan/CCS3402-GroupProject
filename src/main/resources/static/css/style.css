@@ -385,10 +385,14 @@ tbody td:first-child { color: var(--navy); font-weight: 600; }
 .hero-title span { color: var(--gold); }
 
 .hero-sub {
-    color: var(--grey-mid);
-    font-size: 1rem;
-    max-width: 480px;
+    color: #8fa8c8;
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
     line-height: 1.6;
+    text-align: center;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* ── QUICK LINKS ── */
