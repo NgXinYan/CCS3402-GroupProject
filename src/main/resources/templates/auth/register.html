@@ -1,10 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — Register</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
 </head>
-<body>
+<body class="auth-body">
+
+<div class="auth-container">
+
+    <!-- LEFT SIDE — branding -->
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <a href="/" class="auth-brand">Room<span>Estate</span></a>
+            <h2 class="auth-left-title">Join RoomEstate Today</h2>
+            <p class="auth-left-sub">Create your free account and start browsing or listing rooms in minutes.</p>
+            <div class="auth-features">
+                <div class="auth-feature">✅ Free to register</div>
+                <div class="auth-feature">✅ Browse available rooms</div>
+                <div class="auth-feature">✅ Book viewing appointments</div>
+                <div class="auth-feature">✅ List your own rooms</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE — form -->
+    <div class="auth-right">
+        <div class="auth-form-box">
+            <h2 class="auth-title">Create Account</h2>
+            <p class="auth-subtitle">Fill in your details to get started</p>
+
+            <!-- ERROR MESSAGE -->
+            <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+            <form th:action="@{/register}" th:object="${user}" method="post">
+
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" th:field="*{name}"
+                           placeholder="Enter your full name" required/>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" th:field="*{email}"
+                           placeholder="Enter your email" required/>
+                </div>
+
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" th:field="*{phone}"
+                           placeholder="e.g. 0123456789"/>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" th:field="*{password}"
+                           placeholder="Create a password" required/>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    Create Account
+                </button>
+
+            </form>
+
+            <p class="auth-switch">
+                Already have an account?
+                <a href="/login">Sign in here</a>
+            </p>
+        </div>
+    </div>
+
+</div>
 
 </body>
 </html>

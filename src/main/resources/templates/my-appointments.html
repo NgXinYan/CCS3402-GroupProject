@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — My Appointments</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">My <span>Appointments</span></h1>
+        <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+
+    <!-- CONFIRM SUCCESS POPUP -->
+    <div class="popup-overlay" id="confirmPopup"
+         th:if="${param.confirmed}" onclick="closeConfirmPopup()">
+        <div class="popup-box" onclick="event.stopPropagation()">
+            <div class="popup-icon">✅</div>
+            <h3 class="popup-title">Appointment Confirmed!</h3>
+            <p class="popup-msg">
+                The appointment has been successfully confirmed.
+                The tenant will be notified of the confirmation.
+            </p>
+            <button class="btn btn-primary btn-full"
+                    onclick="closeConfirmPopup()">
+                OK, Got it!
+            </button>
+        </div>
+    </div>
+
+    <!-- REJECT SUCCESS POPUP -->
+    <div class="popup-overlay" id="rejectPopup"
+         th:if="${param.rejected}" onclick="closeRejectPopup()">
+        <div class="popup-box" onclick="event.stopPropagation()">
+            <div class="popup-icon">❌</div>
+            <h3 class="popup-title">Appointment Rejected</h3>
+            <p class="popup-msg">
+                The appointment has been rejected and the tenant
+                will be able to see the reason and suggested time.
+            </p>
+            <button class="btn btn-primary btn-full"
+                    onclick="closeRejectPopup()">
+                OK, Got it!
+            </button>
+        </div>
+    </div>
+
+    <!-- TAB TOGGLE -->
+    <div class="tab-toggle">
+        <button class="tab-btn active" id="bookingsTab"
+                onclick="switchTab('bookings')">
+            📅 My Bookings
+            <span class="tab-count"
+                  th:text="${myBookings.size()}">0</span>
+        </button>
+        <button class="tab-btn" id="incomingTab"
+                onclick="switchTab('incoming')">
+            📬 Incoming Requests
+            <span class="tab-count"
+                  th:text="${incomingRequests.size()}">0</span>
+        </button>
+    </div>
+
+    <!-- MY BOOKINGS SECTION -->
+    <div id="bookingsSection">
+        <div class="viewing-grid" th:if="${!myBookings.isEmpty()}">
+            <div class="viewing-card" th:each="apt : ${myBookings}">
+
+                <!-- CARD HEADER -->
+                <div class="viewing-card-header">
+                    <div class="viewing-date-box">
+                            <span class="viewing-day"
+                                  th:text="${#temporals.format(apt.dateTime, 'dd')}">01</span>
+                        <span class="viewing-month"
+                              th:text="${#temporals.format(apt.dateTime, 'MMM')}">Jan</span>
+                    </div>
+                    <div>
+                        <p class="viewing-time">
+                            🕐 <span th:text="${#temporals.format(apt.dateTime, 'hh:mm a')}">10:00 AM</span>
+                        </p>
+                        <span class="badge"
+                              th:classappend="${apt.status == 'Confirmed'} ? 'badge-confirmed' :
+                                                 (${apt.status == 'Cancelled'} ? 'badge-cancelled' :
+                                                 (${apt.status == 'Rejected'} ? 'badge-occupied' : 'badge-pending'))"
+                              th:text="${apt.status}">Status</span>
+                    </div>
+                </div>
+
+                <!-- CARD BODY -->
+                <div class="viewing-card-body">
+                    <div class="viewing-info-row">
+                        <span class="viewing-info-label">🏠 Room</span>
+                        <span class="viewing-info-value"
+                              th:text="${apt.room.title}">Room</span>
+                    </div>
+                    <div class="viewing-info-row">
+                        <span class="viewing-info-label">📍 Location</span>
+                        <span class="viewing-info-value"
+                              th:text="${apt.room.location}">Location</span>
+                    </div>
+                    <div class="viewing-info-row">
+                        <span class="viewing-info-label">💰 Price</span>
+                        <span class="viewing-info-value">
+                                RM <span th:text="${apt.room.price}">0</span>/month
+                            </span>
+                    </div>
+                    <div class="viewing-info-row"
+                         th:if="${apt.notes != null and !apt.notes.isEmpty()}">
+                        <span class="viewing-info-label">📝 Notes</span>
+                        <span class="viewing-info-value"
+                              th:text="${apt.notes}">Notes</span>
+                    </div>
+
+                    <!-- REJECTION INFO -->
+                    <div th:if="${apt.rejectReason != null}"
+                         style="padding:0.75rem; background:var(--danger-pale);
+                                    border-radius:8px; margin-top:0.5rem;">
+                        <p style="font-size:0.8rem; color:var(--danger); font-weight:600;">
+                            ❌ Rejected: <span th:text="${apt.rejectReason}">Reason</span>
+                        </p>
+                        <div th:if="${apt.suggestedTimeFrom != null}"
+                             style="margin-top:0.5rem;">
+                            <p style="font-size:0.8rem; color:var(--warning); font-weight:600;">
+                                📅 Owner suggested:
+                                <span th:text="${#temporals.format(apt.suggestedTimeFrom, 'dd MMM yyyy, hh:mm a')}"></span>
+                                —
+                                <span th:text="${#temporals.format(apt.suggestedTimeTo, 'dd MMM yyyy, hh:mm a')}"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD ACTIONS -->
+                <div class="viewing-card-actions">
+                    <a th:href="@{/rooms/{id}(id=${apt.room.id})}"
+                       class="btn btn-edit">View Room</a>
+                    <a th:href="@{/appointments/cancel/{id}(id=${apt.id})}"
+                       class="btn btn-danger"
+                       th:if="${apt.status == 'Pending'}"
+                       onclick="return confirm('Cancel this appointment?')">Cancel</a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" th:if="${myBookings.isEmpty()}">
+            <div class="empty-icon">📅</div>
+            <p>You have no bookings yet. Browse rooms and book a viewing!</p>
+            <a href="/dashboard" class="btn btn-primary">Browse Rooms</a>
+        </div>
+    </div>
+
+    <!-- INCOMING REQUESTS SECTION -->
+    <div id="incomingSection" style="display:none;">
+        <div class="table-card" th:if="${!incomingRequests.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Room</th>
+                    <th>Tenant</th>
+                    <th>Date & Time</th>
+                    <th>Notes</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="apt, stat : ${incomingRequests}">
+                    <td th:text="${stat.index + 1}">1</td>
+                    <td th:text="${apt.room.title}">Room</td>
+                    <td>
+                        <div style="font-weight:600; color:var(--navy);"
+                             th:text="${apt.tenant.name}">Name</div>
+                        <div style="font-size:0.775rem; color:var(--grey-mid);"
+                             th:text="${apt.tenant.email}">Email</div>
+                        <div style="font-size:0.775rem; color:var(--grey-mid);"
+                             th:text="${apt.tenant.phone}">Phone</div>
+                    </td>
+                    <td th:text="${#temporals.format(apt.dateTime, 'dd MMM yyyy, hh:mm a')}">Date</td>
+                    <td th:text="${apt.notes}">Notes</td>
+                    <td>
+                                <span class="badge"
+                                      th:classappend="${apt.status == 'Confirmed'} ? 'badge-confirmed' :
+                                                     (${apt.status == 'Cancelled'} ? 'badge-cancelled' :
+                                                     (${apt.status == 'Rejected'} ? 'badge-occupied' : 'badge-pending'))"
+                                      th:text="${apt.status}">Status</span>
+                        <!-- REJECTION REASON -->
+                        <div th:if="${apt.rejectReason != null}"
+                             style="font-size:0.75rem; color:var(--danger); margin-top:0.3rem;"
+                             th:text="'Reason: ' + ${apt.rejectReason}">Reason</div>
+                        <!-- SUGGESTED TIME -->
+                        <div th:if="${apt.suggestedTimeFrom != null}"
+                             style="font-size:0.75rem; color:var(--warning); margin-top:0.3rem;">
+                            Suggested:
+                            <span th:text="${#temporals.format(apt.suggestedTimeFrom, 'dd MMM, hh:mm a')}"></span>
+                            —
+                            <span th:text="${#temporals.format(apt.suggestedTimeTo, 'dd MMM, hh:mm a')}"></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <!-- CONFIRM -->
+                            <a th:if="${apt.status == 'Pending'}"
+                               th:href="@{/appointments/confirm/{id}(id=${apt.id})}"
+                               class="btn btn-primary"
+                               style="padding:0.4rem 0.9rem; font-size:0.8rem;"
+                               onclick="return confirm('Confirm this appointment?')">
+                                ✅ Confirm
+                            </a>
+                            <!-- REJECT -->
+                            <a th:if="${apt.status == 'Pending'}"
+                               th:href="@{/appointments/reject/{id}(id=${apt.id})}"
+                               class="btn btn-danger">
+                                ❌ Reject
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" th:if="${incomingRequests.isEmpty()}">
+            <div class="empty-icon">📭</div>
+            <p>No incoming appointment requests yet.</p>
+            <a href="/rooms/my-rooms" class="btn btn-primary">View My Rooms</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    function switchTab(tab) {
+        const bookingsSection = document.getElementById('bookingsSection');
+        const incomingSection = document.getElementById('incomingSection');
+        const bookingsTab = document.getElementById('bookingsTab');
+        const incomingTab = document.getElementById('incomingTab');
+
+        if (tab === 'bookings') {
+            bookingsSection.style.display = 'block';
+            incomingSection.style.display = 'none';
+            bookingsTab.classList.add('active');
+            incomingTab.classList.remove('active');
+        } else {
+            bookingsSection.style.display = 'none';
+            incomingSection.style.display = 'block';
+            bookingsTab.classList.remove('active');
+            incomingTab.classList.add('active');
+        }
+    }
+
+    function closeConfirmPopup() {
+        document.getElementById('confirmPopup').style.display = 'none';
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    function closeRejectPopup() {
+        document.getElementById('rejectPopup').style.display = 'none';
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // auto switch to incoming tab if came from confirm/reject
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('confirmed') || urlParams.get('rejected')) {
+        switchTab('incoming');
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<!-- HERO SEARCH SECTION -->
+<div class="hero">
+    <div class="hero-content">
+        <h1 class="hero-title">
+            Welcome, <span th:text="${loggedInUser.name}">User</span> 👋
+        </h1>
+        <p class="hero-sub">Browse premium rental rooms — search by location, date and type</p>
+
+        <!-- SEARCH BAR -->
+        <form class="search-bar" th:action="@{/dashboard}" method="get">
+            <div class="search-field">
+                <label>Location</label>
+                <input type="text" name="location"
+                       th:value="${location}"
+                       placeholder="Where are you looking?"/>
+            </div>
+            <div class="search-divider"></div>
+            <div class="search-field">
+                <label>Room Type</label>
+                <select name="type">
+                    <option value="">Any Type</option>
+                    <option value="Single"
+                            th:selected="${type == 'Single'}">Single Room</option>
+                    <option value="Master"
+                            th:selected="${type == 'Master'}">Master Room</option>
+                    <option value="Whole Unit"
+                            th:selected="${type == 'Whole Unit'}">Whole Unit</option>
+                </select>
+            </div>
+            <button type="submit" class="search-btn">🔍 Search</button>
+        </form>
+
+        <!-- FILTER TAGS -->
+        <div class="filter-tags">
+            <a href="/dashboard" class="filter-tag"
+               th:classappend="${location == null and type == null} ? ' active' : ''">All</a>
+            <a href="/dashboard?type=Single" class="filter-tag"
+               th:classappend="${type == 'Single'} ? ' active' : ''">Single</a>
+            <a href="/dashboard?type=Master" class="filter-tag"
+               th:classappend="${type == 'Master'} ? ' active' : ''">Master</a>
+            <a href="/dashboard?type=Whole Unit" class="filter-tag"
+               th:classappend="${type == 'Whole Unit'} ? ' active' : ''">Whole Unit</a>
+        </div>
+    </div>
+</div>
+
+<div class="main-content">
+
+    <!-- STAT CARDS -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Rooms</div>
+            <div class="stat-value" th:text="${totalRooms}">0</div>
+            <div class="stat-sub">Properties listed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">My Rooms</div>
+            <div class="stat-value" th:text="${myRooms}">0</div>
+            <div class="stat-sub">Rooms you listed</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">My Appointments</div>
+            <div class="stat-value" th:text="${myAppointments}">0</div>
+            <div class="stat-sub">Viewings scheduled</div>
+        </div>
+    </div>
+
+    <!-- ROOMS LISTING -->
+    <div class="page-header">
+        <h2 class="page-title">Available <span>Rooms</span></h2>
+        <div style="display:flex; gap:0.75rem; align-items:center;">
+            <div class="view-toggle">
+                <button class="vt-btn active" id="gridBtn"
+                        onclick="switchView('grid')">⊞ Grid</button>
+                <button class="vt-btn" id="listBtn"
+                        onclick="switchView('list')">≡ List</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- GRID VIEW -->
+    <div id="gridView">
+        <div class="room-grid" th:if="${!rooms.isEmpty()}">
+            <a th:each="room : ${rooms}"
+               th:href="@{/rooms/{id}(id=${room.id})}"
+               class="room-card">
+                <div class="room-card-img">
+                    <span class="room-type-badge" th:text="${room.type}">Type</span>
+                </div>
+                <div class="room-card-body">
+                    <h3 class="room-card-title" th:text="${room.title}">Title</h3>
+                    <p class="room-card-location">
+                        📍 <span th:text="${room.location}">Location</span>
+                    </p>
+                    <p class="room-card-desc" th:text="${room.description}">Description</p>
+                    <div class="room-card-footer">
+                        <div class="room-card-price">
+                            RM <span th:text="${room.price}">0</span>
+                            <small>/month</small>
+                        </div>
+                        <span class="badge"
+                              th:classappend="${room.status == 'Available'} ? 'badge-available' :
+                                                 (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
+                              th:text="${room.status}">Status</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" th:if="${rooms.isEmpty()}">
+            <div class="empty-icon">🏠</div>
+            <p>No rooms found matching your search.</p>
+            <a href="/dashboard" class="btn btn-primary">Clear Search</a>
+        </div>
+    </div>
+
+    <!-- LIST VIEW -->
+    <div id="listView" style="display:none;">
+        <div class="table-card" th:if="${!rooms.isEmpty()}">
+            <table>
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="room, stat : ${rooms}">
+                    <td th:text="${stat.index + 1}">1</td>
+                    <td th:text="${room.title}">Title</td>
+                    <td th:text="${room.type}">Type</td>
+                    <td th:text="${room.location}">Location</td>
+                    <td>RM <span th:text="${room.price}">0</span></td>
+                    <td>
+                                <span class="badge"
+                                      th:classappend="${room.status == 'Available'} ? 'badge-available' :
+                                                     (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
+                                      th:text="${room.status}">Status</span>
+                    </td>
+                    <td>
+                        <a th:href="@{/rooms/{id}(id=${room.id})}"
+                           class="btn btn-edit">View</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" th:if="${rooms.isEmpty()}">
+            <div class="empty-icon">🏠</div>
+            <p>No rooms found matching your search.</p>
+            <a href="/dashboard" class="btn btn-primary">Clear Search</a>
+        </div>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    function switchView(view) {
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        const gridBtn = document.getElementById('gridBtn');
+        const listBtn = document.getElementById('listBtn');
+
+        if (view === 'grid') {
+            gridView.style.display = 'block';
+            listView.style.display = 'none';
+            gridBtn.classList.add('active');
+            listBtn.classList.remove('active');
+        } else {
+            gridView.style.display = 'none';
+            listView.style.display = 'block';
+            gridBtn.classList.remove('active');
+            listBtn.classList.add('active');
+        }
+    }
+</script>
+
+</body>
+</html>

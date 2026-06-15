@@ -20,6 +20,15 @@ public class UserService {
         return true;
     }
 
+    // LOGIN - check email and password
+    public User login(String email, String password) {
+        User user = userRepository.findByEmail(email);
+        if (user != null && user.getPassword().equals(password)) {
+            return user;                // login successful
+        }
+        return null;                    // login failed
+    }
+
     //GET user by id
     public User getUserById(Long id){
         return userRepository.findById(id).get();

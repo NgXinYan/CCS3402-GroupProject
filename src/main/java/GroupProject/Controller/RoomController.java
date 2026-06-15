@@ -1,14 +1,18 @@
 package GroupProject.Controller;
 
+import GroupProject.Entity.Appointment;
 import GroupProject.Entity.Room;
+import GroupProject.Entity.User;
+import GroupProject.Service.AppointmentService;
 import GroupProject.Service.RoomService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ui.Model;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Controller
@@ -18,38 +22,139 @@ public class RoomController {
     @Autowired
     private RoomService roomService;
 
-    //READ - show all rooms
-    @GetMapping
-    public String listRooms(Model model){
-        model.addAttribute("rooms", roomService.getAllRooms());
-        return "rooms/list";
+    @Autowired
+    private AppointmentService appointmentService;
+
+    //ROOM DETAIL PAGE
+    @GetMapping("/{id}")
+    public String roomDetail(@PathVariable Long id, HttpSession session, Model model){
+        User user = (User) session.getAttribute("loggedInUser");
+        if(user == null){
+            return "redirect:/login";
+        }
+
+        Room room = roomService.getRoomById(id);
+        List<Appointment> appointments = appointmentService.getAppointmentsByRoom(room);
+
+        model.addAttribute("room", room);
+        model.addAttribute("appointments", appointments);
+        model.addAttribute("loggedInUser", user);
+        model.addAttribute("newAppointment", new Appointment());
+        return "room-detail";
     }
 
-    //CREATE - show add room form
+    //SHOW ADD ROOM FORM
     @GetMapping("/add")
-    public String addRoom(Model model){
+    public String showAddForm(HttpSession session, Model model){
+        User user = (User) session.getAttribute("loggedInUser");
+        if(user == null) return "redirect:/login";
+
         model.addAttribute("room", new Room());
-        return "room/form";
+        model.addAttribute("loggedInUser", user);
+        return "add-room";
     }
 
-    //CREATE - save new room
+    //SAVE NEW ROOM
     @PostMapping("/save")
-    public String saveRoom(Room room){
+    public String saveRoom(@ModelAttribute Room room, HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) return "redirect:/login";
+
+        room.setOwner(user);
+        room.setStatus("Available");
         roomService.saveRoom(room);
-        return "redirect:/rooms";
+        return "redirect:/rooms/my-rooms"; //change here
     }
 
-    //UPDATE - show edit form with existing data
+    //EDIT ROOM FORM
     @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Long id, Model model){
-        model.addAttribute("room", roomService.getRoomById(id));
-        return "room/form";
+    public String showEdirForm(@PathVariable Long id, HttpSession session, Model model){
+        User user = (User) session.getAttribute("loggedInUser");
+        if(user == null) return "redirect:/login";
+
+        Room room = roomService.getRoomById(id);
+        model.addAttribute("room", room);
+        model.addAttribute("loggedInUser", user);
+        return "add-room";
     }
 
-    //DELETE - delete room
+    // UPDATE ROOM
+    @PostMapping("/update/{id}")
+    public String updateRoom(@PathVariable Long id,
+                             @ModelAttribute Room room,
+                             HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) return "redirect:/login";
+
+        room.setId(id);
+        room.setOwner(user);
+        roomService.saveRoom(room);
+        return "redirect:/rooms/my-rooms"; //here
+    }
+
+    // DELETE ROOM
     @GetMapping("/delete/{id}")
-    public String deleteRoom(@PathVariable Long id){
+    public String deleteRoom(@PathVariable Long id, HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) return "redirect:/login";
+
+        // delete all appointments for this room first
+        Room room = roomService.getRoomById(id);
+        List<Appointment> appointments = appointmentService.getAppointmentsByRoom(room);
+        for (Appointment apt : appointments) {
+            appointmentService.deleteAppointment(apt.getId());
+        }
+
+        // then delete the room
         roomService.deleteRoomById(id);
-        return "redirect:/rooms";
+        return "redirect:/rooms/my-rooms";
+    }
+
+    // MY ROOMS PAGE
+    @GetMapping("/my-rooms")
+    public String myRooms(HttpSession session, Model model) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) return "redirect:/login";
+
+        List<Room> myRooms = roomService.getRoomsByOwner(user);
+        model.addAttribute("rooms", myRooms);
+        model.addAttribute("loggedInUser", user);
+        return "my-rooms";
+    }
+
+    // BOOK APPOINTMENT
+    @PostMapping("/{id}/book")
+    public String bookAppointment(@PathVariable Long id,
+                                  @RequestParam String dateTime,
+                                  @RequestParam(required = false) String notes,
+                                  HttpSession session,
+                                  Model model) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) return "redirect:/login";
+
+        Room room = roomService.getRoomById(id);
+        LocalDateTime parsedDateTime = LocalDateTime.parse(dateTime);
+
+        // check if time slot already taken
+        if (appointmentService.isTimeSlotTaken(room, parsedDateTime)) {
+            model.addAttribute("room", room);
+            model.addAttribute("appointments",
+                    appointmentService.getAppointmentsByRoom(room));
+            model.addAttribute("loggedInUser", user);
+            model.addAttribute("newAppointment", new Appointment());
+            model.addAttribute("timeError",
+                    "This time slot is already booked! Please choose another time.");
+            return "room-detail";
+        }
+
+        Appointment appointment = new Appointment();
+        appointment.setRoom(room);
+        appointment.setTenant(user);
+        appointment.setDateTime(parsedDateTime);
+        appointment.setStatus("Pending");
+        appointment.setNotes(notes);
+        appointmentService.saveAppointment(appointment);
+
+        return "redirect:/rooms/" + id + "?success=true";
     }
 }

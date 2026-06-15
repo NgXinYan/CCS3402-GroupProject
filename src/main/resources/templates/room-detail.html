@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — Room Detail</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">Room <span>Detail</span></h1>
+        <a href="/dashboard" class="btn btn-secondary">← Back to Rooms</a>
+    </div>
+
+    <!-- SUCCESS POPUP -->
+    <div class="popup-overlay" id="successPopup"
+         th:if="${param.success}" onclick="closePopup()">
+        <div class="popup-box" onclick="event.stopPropagation()">
+            <div class="popup-icon">🎉</div>
+            <h3 class="popup-title">Appointment Booked!</h3>
+            <p class="popup-msg">
+                Your viewing appointment has been successfully scheduled.
+                The room owner will review and confirm your appointment shortly.
+            </p>
+            <a href="/appointments/my" class="btn btn-primary btn-full">
+                View My Appointments
+            </a>
+            <br/><br/>
+            <a href="/dashboard" class="btn btn-secondary btn-full">
+                Continue Browsing
+            </a>
+        </div>
+    </div>
+
+    <!-- ROOM DETAIL GRID -->
+    <div class="room-detail-grid">
+
+        <!-- LEFT SIDE — room info -->
+        <div>
+            <!-- ROOM IMAGE -->
+            <div class="room-detail-img">🏠</div>
+
+            <!-- ROOM INFO CARD -->
+            <div class="room-detail-info">
+                <h2 class="room-detail-title" th:text="${room.title}">Room Title</h2>
+
+                <div class="room-detail-price">
+                    RM <span th:text="${room.price}">0</span>
+                    <small>/month</small>
+                </div>
+
+                <div class="room-detail-meta">
+                    <div class="room-meta-row">
+                        <span class="room-meta-label">📍 Location</span>
+                        <span class="room-meta-value"
+                              th:text="${room.location}">Location</span>
+                    </div>
+                    <div class="room-meta-row">
+                        <span class="room-meta-label">🏠 Type</span>
+                        <span class="room-meta-value"
+                              th:text="${room.type}">Type</span>
+                    </div>
+                    <div class="room-meta-row">
+                        <span class="room-meta-label">📋 Status</span>
+                        <span class="badge"
+                              th:classappend="${room.status == 'Available'} ? 'badge-available' :
+                                                 (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
+                              th:text="${room.status}">Status</span>
+                    </div>
+                    <div class="room-meta-row">
+                        <span class="room-meta-label">👤 Owner</span>
+                        <span class="room-meta-value"
+                              th:text="${room.owner.name}">Owner</span>
+                    </div>
+                </div>
+
+                <!-- DESCRIPTION -->
+                <div class="form-group">
+                    <label>About This Room</label>
+                    <p style="font-size:0.9rem; color:var(--slate); line-height:1.7;"
+                       th:text="${room.description}">Description</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDE — booking form + appointments -->
+        <div>
+            <div class="booking-card">
+                <h3 class="booking-title">📅 Book a Viewing</h3>
+
+                <!-- BOOKING FORM — open to all unless Occupied -->
+                <div th:if="${room.status != 'Occupied'}">
+                    <form th:action="@{/rooms/{id}/book(id=${room.id})}"
+                          method="post">
+
+                        <div class="form-group" style="margin-bottom:1.25rem;">
+                            <label>Select Date</label>
+                            <input type="date" id="dateInput"
+                                   onchange="updateSlots()" required/>
+                        </div>
+
+                        <div class="form-group" style="margin-bottom:1.25rem;">
+                            <label>Select Time Slot</label>
+                            <select id="timeSlot" name="dateTime" required>
+                                <option value="">-- Pick a date first --</option>
+                            </select>
+                        </div>
+
+                        <!-- TIME ERROR -->
+                        <div class="alert alert-danger"
+                             th:if="${timeError}"
+                             th:text="${timeError}"></div>
+
+                        <div class="form-group" style="margin-bottom:1.5rem;">
+                            <label>Notes (Optional)</label>
+                            <textarea name="notes"
+                                      placeholder="Any special requests or questions..."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-full">
+                            Book Viewing Appointment
+                        </button>
+
+                    </form>
+                </div>
+
+                <!-- IF OCCUPIED -->
+                <div th:if="${room.status == 'Occupied'}"
+                     class="empty-state" style="padding:2rem 0;">
+                    <div class="empty-icon">🔒</div>
+                    <p>This room is currently occupied and not available for booking.</p>
+                </div>
+            </div>
+
+            <!-- EXISTING APPOINTMENTS — only show to room owner or the tenant who booked -->
+            <div class="booking-card" style="margin-top:1.5rem;"
+                 th:if="${!appointments.isEmpty()}">
+                <h3 class="booking-title">📋 Appointments</h3>
+                <div th:each="apt : ${appointments}">
+                    <!-- only show if logged in user is owner OR is the tenant who booked -->
+                    <div th:if="${apt.tenant.id == loggedInUser.id or room.owner.id == loggedInUser.id}"
+                         style="padding:0.75rem 0; border-bottom:1px solid var(--grey-light);">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <p style="font-size:0.875rem; font-weight:600; color:var(--navy);"
+                                   th:text="${apt.tenant.name}">Tenant</p>
+                                <p style="font-size:0.8rem; color:var(--grey-mid);"
+                                   th:text="${#temporals.format(apt.dateTime, 'dd MMM yyyy, hh:mm a')}">Date</p>
+                            </div>
+                            <span class="badge"
+                                  th:classappend="${apt.status == 'Confirmed'} ? 'badge-confirmed' :
+                                     (${apt.status == 'Cancelled'} ? 'badge-cancelled' :
+                                     (${apt.status == 'Rejected'} ? 'badge-occupied' : 'badge-pending'))"
+                                  th:text="${apt.status}">Status</span>
+                        </div>
+                        <!-- REJECTION REASON -->
+                        <div th:if="${apt.rejectReason != null}"
+                             style="margin-top:0.5rem; padding:0.5rem;
+                        background:var(--danger-pale); border-radius:6px;
+                        font-size:0.8rem; color:var(--danger);">
+                            ❌ Rejected: <span th:text="${apt.rejectReason}">Reason</span>
+                            <span th:if="${apt.suggestedTimeFrom != null}">
+                    <br/>📅 Suggested:
+                    <span th:text="${#temporals.format(apt.suggestedTimeFrom, 'dd MMM yyyy, hh:mm a')}"></span>
+                    —
+                    <span th:text="${#temporals.format(apt.suggestedTimeTo, 'dd MMM yyyy, hh:mm a')}"></span>
+                </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    // close success popup
+    function closePopup() {
+        document.getElementById('successPopup').style.display = 'none';
+        window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // generate 30-min time slots
+    function updateSlots() {
+        const dateInput = document.getElementById('dateInput').value;
+        const timeSlot = document.getElementById('timeSlot');
+        timeSlot.innerHTML = '';
+
+        if (!dateInput) return;
+
+        // slots from 8:00 AM to 8:00 PM
+        for (let h = 8; h < 20; h++) {
+            [0, 30].forEach(m => {
+                const option = document.createElement('option');
+                const value = `${dateInput}T${pad(h)}:${pad(m)}`;
+                const period = h >= 12 ? 'PM' : 'AM';
+                const hour = h > 12 ? h - 12 : (h === 0 ? 12 : h);
+                option.value = value;
+                option.textContent = `${hour}:${pad(m)} ${period}`;
+                timeSlot.appendChild(option);
+            });
+        }
+    }
+
+    function pad(n) { return n.toString().padStart(2, '0'); }
+</script>
+
+</body>
+</html>

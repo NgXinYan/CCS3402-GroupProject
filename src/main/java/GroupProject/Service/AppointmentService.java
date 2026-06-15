@@ -7,6 +7,7 @@ import GroupProject.Repository.AppointmentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 public class AppointmentService {
@@ -34,6 +35,15 @@ public class AppointmentService {
         return appointmentRepository.findById(id).orElseThrow(
                 () -> new RuntimeException("Appointment not found with id: " + id)
         );
+    }
+
+    // check if 30-min time slot is already taken
+    public boolean isTimeSlotTaken(Room room, LocalDateTime dateTime) {
+        // round down to nearest 30 min slot
+        int minute = dateTime.getMinute() >= 30 ? 30 : 0;
+        LocalDateTime slotStart = dateTime.withMinute(minute).withSecond(0).withNano(0);
+        LocalDateTime slotEnd = slotStart.plusMinutes(30);
+        return appointmentRepository.existsByRoomAndTimeSlot(room, slotStart, slotEnd);
     }
 
     // CREATE & UPDATE - save appointment

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+
+    <!-- LEFT SIDE — branding -->
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <a href="/" class="auth-brand">Room<span>Estate</span></a>
+            <h2 class="auth-left-title">Find Your Perfect Room</h2>
+            <p class="auth-left-sub">Browse premium rental rooms, book viewings and manage your properties all in one place.</p>
+            <div class="auth-features">
+                <div class="auth-feature">✅ Browse available rooms</div>
+                <div class="auth-feature">✅ Book viewing appointments</div>
+                <div class="auth-feature">✅ List your own rooms</div>
+                <div class="auth-feature">✅ Manage appointments</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDE — form -->
+    <div class="auth-right">
+        <div class="auth-form-box">
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to your account</p>
+
+            <!-- SUCCESS MESSAGE after register -->
+            <div class="alert alert-success" th:if="${param.registered}">
+                ✅ Account created successfully! Please login.
+            </div>
+
+            <!-- ERROR MESSAGE -->
+            <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+            <form th:action="@{/login}" method="post">
+
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email"
+                           placeholder="Enter your email" required/>
+                </div>
+
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password"
+                           placeholder="Enter your password" required/>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    Sign In
+                </button>
+
+            </form>
+
+            <p class="auth-switch">
+                Don't have an account?
+                <a href="/register">Create one here</a>
+            </p>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
