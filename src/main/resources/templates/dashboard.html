@@ -21,40 +21,148 @@
         <p class="hero-sub">Browse premium rental rooms — search by location, date and type</p>
 
         <!-- SEARCH BAR -->
-        <form class="search-bar" th:action="@{/dashboard}" method="get">
-            <div class="search-field">
-                <label>Location</label>
-                <input type="text" name="location"
-                       th:value="${location}"
-                       placeholder="Where are you looking?"/>
+        <form class="search-form-wrapper" th:action="@{/dashboard}" method="get" style="text-align:left; max-width:800px; margin:0 auto;">
+            <div class="search-bar" style="margin-bottom:1rem;">
+                <div class="search-field" style="flex: 2;">
+                    <label>Location</label>
+                    <input type="text" name="location"
+                           th:value="${location}"
+                           placeholder="Where are you looking?"/>
+                </div>
+                <div class="search-divider"></div>
+                <button type="button" class="btn btn-secondary" onclick="openFiltersModal()" style="background: transparent; color: var(--navy); border: none; font-weight: 600; padding: 0 1rem;">
+                    <span id="filterCountBtn">⚙️ Filters</span>
+                </button>
+                <div class="search-divider"></div>
+                <button type="submit" class="search-btn">🔍 Search</button>
             </div>
-            <div class="search-divider"></div>
-            <div class="search-field">
-                <label>Room Type</label>
-                <select name="type">
-                    <option value="">Any Type</option>
-                    <option value="Single"
-                            th:selected="${type == 'Single'}">Single Room</option>
-                    <option value="Master"
-                            th:selected="${type == 'Master'}">Master Room</option>
-                    <option value="Whole Unit"
-                            th:selected="${type == 'Whole Unit'}">Whole Unit</option>
-                </select>
+
+            <!-- FILTERS MODAL -->
+            <div class="popup-overlay" id="filtersModal" style="display:none;" onclick="closeFiltersModal()">
+                <div class="popup-box" onclick="event.stopPropagation()" style="max-width: 600px; padding: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--navy);">Advanced Filters</h3>
+                    
+                    <div style="text-align: left; max-height: 60vh; overflow-y: auto; padding-right: 1rem;">
+                        
+                        <!-- Type, Status, Carpark -->
+                        <div class="form-grid" style="margin-bottom: 1.5rem;">
+                            <div class="form-group">
+                                <label>Room Type</label>
+                                <select name="type">
+                                    <option value="">Any Type</option>
+                                    <option value="Single" th:selected="${type == 'Single'}">Single Room</option>
+                                    <option value="Master" th:selected="${type == 'Master'}">Master Room</option>
+                                    <option value="Whole Unit" th:selected="${type == 'Whole Unit'}">Whole Unit</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select name="status">
+                                    <option value="">Any</option>
+                                    <option value="Available" th:selected="${status == 'Available'}">Available</option>
+                                    <option value="Pending" th:selected="${status == 'Pending'}">Pending</option>
+                                    <option value="Occupied" th:selected="${status == 'Occupied'}">Occupied</option>
+                                </select>
+                            </div>
+                            <div class="form-group" id="carParkLotsFilterGroup" style="display: none;">
+                                <label>Car Parks (Min)</label>
+                                <input type="number" name="carParkLots" min="0" placeholder="e.g. 1" th:value="${carParkLots}"/>
+                            </div>
+                        </div>
+
+                        <label style="font-weight: 600; color: var(--navy); display: block; margin-bottom: 0.5rem;">Facilities & Amenities</label>
+                        <div class="facilities-grid">
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="fullyFurnished" th:checked="${facilities != null and facilities.contains('fullyFurnished')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Fully Furnished</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="wifiIncluded" th:checked="${facilities != null and facilities.contains('wifiIncluded')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>WiFi Included</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="airCond" th:checked="${facilities != null and facilities.contains('airCond')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Air Conditioning</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="digitalDoorLock" th:checked="${facilities != null and facilities.contains('digitalDoorLock')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Digital Door Lock</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="carPark" th:checked="${facilities != null and facilities.contains('carPark')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Car Park</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="privateBathroom" th:checked="${facilities != null and facilities.contains('privateBathroom')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Private Bathroom</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="sharedBathroom" th:checked="${facilities != null and facilities.contains('sharedBathroom')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Shared Bathroom</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="utilitiesIncluded" th:checked="${facilities != null and facilities.contains('utilitiesIncluded')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Utilities Included</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="cookingAllowed" th:checked="${facilities != null and facilities.contains('cookingAllowed')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Cooking Allowed</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="petsAllowed" th:checked="${facilities != null and facilities.contains('petsAllowed')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Pets Allowed</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="noOwnerStays" th:checked="${facilities != null and facilities.contains('noOwnerStays')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>No Owner Stays</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="serviceResidence" th:checked="${facilities != null and facilities.contains('serviceResidence')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Service Residence</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="waterHeater" th:checked="${facilities != null and facilities.contains('waterHeater')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Water Heater</span>
+                            </label>
+                            <label class="facility-item">
+                                <input type="checkbox" name="facilities" value="washingMachine" th:checked="${facilities != null and facilities.contains('washingMachine')}"/>
+                                <span class="facility-check">✓</span>
+                                <span>Washing Machine</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+                        <button type="button" class="btn btn-primary" onclick="closeFiltersModal()">Done</button>
+                        <button type="button" class="btn btn-secondary" onclick="clearFilters()">Clear</button>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="search-btn">🔍 Search</button>
         </form>
 
         <!-- FILTER TAGS -->
-        <div class="filter-tags">
-            <a href="/dashboard" class="filter-tag"
-               th:classappend="${location == null and type == null} ? ' active' : ''">All</a>
-            <a href="/dashboard?type=Single" class="filter-tag"
-               th:classappend="${type == 'Single'} ? ' active' : ''">Single</a>
-            <a href="/dashboard?type=Master" class="filter-tag"
-               th:classappend="${type == 'Master'} ? ' active' : ''">Master</a>
-            <a href="/dashboard?type=Whole Unit" class="filter-tag"
-               th:classappend="${type == 'Whole Unit'} ? ' active' : ''">Whole Unit</a>
-        </div>
+<!--        <div class="filter-tags">-->
+<!--            <a href="/dashboard" class="filter-tag"-->
+<!--               th:classappend="${location == null and type == null} ? ' active' : ''">All</a>-->
+<!--            <a href="/dashboard?type=Single" class="filter-tag"-->
+<!--               th:classappend="${type == 'Single'} ? ' active' : ''">Single</a>-->
+<!--            <a href="/dashboard?type=Master" class="filter-tag"-->
+<!--               th:classappend="${type == 'Master'} ? ' active' : ''">Master</a>-->
+<!--            <a href="/dashboard?type=Whole Unit" class="filter-tag"-->
+<!--               th:classappend="${type == 'Whole Unit'} ? ' active' : ''">Whole Unit</a>-->
+<!--        </div>-->
     </div>
 </div>
 
@@ -205,6 +313,73 @@
             listView.style.display = 'block';
             gridBtn.classList.remove('active');
             listBtn.classList.add('active');
+        }
+    }
+
+    function openFiltersModal() {
+        document.getElementById('filtersModal').style.display = 'flex';
+    }
+
+    function closeFiltersModal() {
+        document.getElementById('filtersModal').style.display = 'none';
+        updateFilterCount();
+    }
+
+    function clearFilters() {
+        // clear type
+        document.querySelector('#filtersModal select[name="type"]').value = '';
+        // clear status
+        document.querySelector('#filtersModal select[name="status"]').value = '';
+        // clear carpark
+        document.querySelector('#filtersModal input[name="carParkLots"]').value = '';
+        // clear checkboxes
+        const checkboxes = document.querySelectorAll('#filtersModal input[type="checkbox"]');
+        checkboxes.forEach(cb => cb.checked = false);
+        
+        toggleCarParkFilterLots();
+        updateFilterCount();
+    }
+    
+    function updateFilterCount() {
+        const type = document.querySelector('#filtersModal select[name="type"]').value;
+        const status = document.querySelector('#filtersModal select[name="status"]').value;
+        const carPark = document.querySelector('#filtersModal input[name="carParkLots"]').value;
+        const checkboxes = document.querySelectorAll('#filtersModal input[type="checkbox"]:checked');
+        
+        let count = 0;
+        if (type) count++;
+        if (status) count++;
+        if (carPark) count++;
+        count += checkboxes.length;
+        
+        const btnTextSpan = document.getElementById('filterCountBtn');
+        if (count > 0) {
+            btnTextSpan.textContent = '⚙️ Filters (' + count + ')';
+        } else {
+            btnTextSpan.textContent = '⚙️ Filters';
+        }
+    }
+    
+    function toggleCarParkFilterLots() {
+        const carParkCheckbox = document.querySelector('#filtersModal input[name="facilities"][value="carPark"]');
+        const carParkLotsGroup = document.getElementById('carParkLotsFilterGroup');
+        const carParkLotsInput = document.querySelector('#filtersModal input[name="carParkLots"]');
+        
+        if (carParkCheckbox && carParkCheckbox.checked) {
+            carParkLotsGroup.style.display = 'block';
+        } else {
+            carParkLotsGroup.style.display = 'none';
+            if (carParkLotsInput) carParkLotsInput.value = '';
+        }
+    }
+    
+    // Call on load to set initial count and toggle states
+    window.onload = function() {
+        updateFilterCount();
+        const carParkCheckbox = document.querySelector('#filtersModal input[name="facilities"][value="carPark"]');
+        if (carParkCheckbox) {
+            toggleCarParkFilterLots();
+            carParkCheckbox.addEventListener('change', toggleCarParkFilterLots);
         }
     }
 </script>

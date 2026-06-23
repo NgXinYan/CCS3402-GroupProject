@@ -39,12 +39,15 @@ public class HomeController {
     public String dashboard(HttpSession session,
                             Model model,
                             @RequestParam(required = false) String location,
-                            @RequestParam(required = false) String type) {
+                            @RequestParam(required = false) String type,
+                            @RequestParam(required = false) String status,
+                            @RequestParam(required = false) List<String> facilities,
+                            @RequestParam(required = false) Integer carParkLots) {
 
         User user = (User) session.getAttribute("loggedInUser");
         if (user == null) return "redirect:/login";
 
-        List<Room> rooms = roomService.searchRooms(location, type);
+        List<Room> rooms = roomService.searchRooms(location, type, status, facilities, carParkLots);
 
         model.addAttribute("rooms", rooms);
         model.addAttribute("loggedInUser", user);
@@ -54,6 +57,9 @@ public class HomeController {
                 appointmentService.getAppointmentsByTenant(user).size());
         model.addAttribute("location", location);
         model.addAttribute("type", type);
+        model.addAttribute("status", status);
+        model.addAttribute("facilities", facilities);
+        model.addAttribute("carParkLots", carParkLots);
 
         // get wishlist room ids for heart icon state
         List<Long> wishlistRoomIds = wishlistService.getWishlistRooms(user)

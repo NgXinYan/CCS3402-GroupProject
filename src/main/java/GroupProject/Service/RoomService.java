@@ -5,7 +5,10 @@ import GroupProject.Entity.User;
 import GroupProject.Repository.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification;
+import jakarta.persistence.criteria.Predicate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,16 +34,33 @@ public class RoomService {
         return roomRepository.findByOwner(owner);
     }
 
-    //SEARCH - search room by locations and type
-    public List<Room> searchRooms(String location, String type) {
-        if (location != null && !location.isEmpty() && type != null && !type.isEmpty()) {
-            return roomRepository.findByLocationContainingIgnoreCaseAndType(location, type);
-        } else if (location != null && !location.isEmpty()) {
-            return roomRepository.findByLocationContainingIgnoreCase(location);
-        } else if (type != null && !type.isEmpty()) {
-            return roomRepository.findByType(type);
-        }
-        return roomRepository.findAll();    // return all if no filter
+    //SEARCH - search room by location, type, status, facilities, car park lots
+    public List<Room> searchRooms(String location, String type, String status, List<String> facilities, Integer carParkLots) {
+        Specification<Room> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            if (location != null && !location.isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("location")), "%" + location.toLowerCase() + "%"));
+            }
+            if (type != null && !type.isEmpty()) {
+                predicates.add(cb.equal(root.get("type"), type));
+            }
+            if (status != null && !status.isEmpty()) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            if (carParkLots != null && carParkLots > 0) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("carParkLots"), carParkLots));
+            }
+            if (facilities != null && !facilities.isEmpty()) {
+                for (String facility : facilities) {
+                    predicates.add(cb.isTrue(root.get(facility)));
+                }
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return roomRepository.findAll(spec);
     }
 
     //CREATE & UPDATE - save room

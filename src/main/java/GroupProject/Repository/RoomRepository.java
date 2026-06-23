@@ -3,11 +3,12 @@ package GroupProject.Repository;
 import GroupProject.Entity.Room;
 import GroupProject.Entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RoomRepository extends JpaRepository<Room, Long> {
+public interface RoomRepository extends JpaRepository<Room, Long>, JpaSpecificationExecutor<Room> {
 
     // get all rooms owned by a specific user
     List<Room> findByOwner(User owner);
