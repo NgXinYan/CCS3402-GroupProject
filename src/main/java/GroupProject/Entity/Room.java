@@ -89,5 +89,11 @@ public class Room {
     private Boolean washingMachine;         // washing machine
 
     @Column(name = "other_facilities", length = 500)
-    private String otherFacilities;         // custom facilities by owner
+    private String otherFacilities;
+
+    @ManyToOne
+    @JoinColumn(name = "current_tenant_id")
+    private User currentTenant;             // tenant who is renting this room (set when not available)// custom facilities by owner
+
+
 }

@@ -7,30 +7,42 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
+
     @Autowired
     private UserRepository userRepository;
 
-    //REGISTER - save new user
-    public boolean register(User user){
-        //check if email already exists
-        if(userRepository.findByEmail(user.getEmail())!=null){
+    public boolean register(User user) {
+        if (userRepository.existsByEmail(user.getEmail())) {
             return false;
         }
         userRepository.save(user);
         return true;
     }
 
-    // LOGIN - check email and password
     public User login(String email, String password) {
         User user = userRepository.findByEmail(email);
         if (user != null && user.getPassword().equals(password)) {
-            return user;                // login successful
+            return user;
         }
-        return null;                    // login failed
+        return null;
     }
 
-    //GET user by id
-    public User getUserById(Long id){
-        return userRepository.findById(id).get();
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
+
+    // find user by email (used for setting tenant)
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    // update user profile
+    public void updateProfile(User user) {
+        userRepository.save(user);
+    }
+
+    // delete account
+    public void deleteAccount(Long id) {
+        userRepository.deleteById(id);
     }
 }

@@ -95,30 +95,39 @@
     <!-- GRID VIEW -->
     <div id="gridView">
         <div class="room-grid" th:if="${!rooms.isEmpty()}">
-            <a th:each="room : ${rooms}"
-               th:href="@{/rooms/{id}(id=${room.id})}"
-               class="room-card">
-                <div class="room-card-img">
-                    <span class="room-type-badge" th:text="${room.type}">Type</span>
-                </div>
-                <div class="room-card-body">
-                    <h3 class="room-card-title" th:text="${room.title}">Title</h3>
-                    <p class="room-card-location">
-                        📍 <span th:text="${room.location}">Location</span>
-                    </p>
-                    <p class="room-card-desc" th:text="${room.description}">Description</p>
-                    <div class="room-card-footer">
-                        <div class="room-card-price">
-                            RM <span th:text="${room.price}">0</span>
-                            <small>/month</small>
-                        </div>
-                        <span class="badge"
-                              th:classappend="${room.status == 'Available'} ? 'badge-available' :
-                                                 (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
-                              th:text="${room.status}">Status</span>
+            <div th:each="room : ${rooms}" class="room-card-wrapper">
+
+                <!-- HEART ICON -->
+                <a th:href="@{/wishlist/toggle/{id}(id=${room.id})}"
+                   class="wishlist-heart"
+                   th:classappend="${wishlistRoomIds.contains(room.id)} ? ' saved' : ''"
+                   onclick="event.stopPropagation();">
+                    <span th:text="${wishlistRoomIds.contains(room.id)} ? '❤️' : '🤍'">🤍</span>
+                </a>
+
+                <a th:href="@{/rooms/{id}(id=${room.id})}" class="room-card">
+                    <div class="room-card-img">
+                        <span class="room-type-badge" th:text="${room.type}">Type</span>
                     </div>
-                </div>
-            </a>
+                    <div class="room-card-body">
+                        <h3 class="room-card-title" th:text="${room.title}">Title</h3>
+                        <p class="room-card-location">
+                            📍 <span th:text="${room.location}">Location</span>
+                        </p>
+                        <p class="room-card-desc" th:text="${room.description}">Description</p>
+                        <div class="room-card-footer">
+                            <div class="room-card-price">
+                                RM <span th:text="${room.price}">0</span>
+                                <small>/month</small>
+                            </div>
+                            <span class="badge"
+                                  th:classappend="${room.status == 'Available'} ? 'badge-available' :
+                                         (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
+                                  th:text="${room.status}">Status</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
         </div>
 
         <!-- EMPTY STATE -->

@@ -46,11 +46,55 @@
                             RM <span th:text="${room.price}">0</span>
                             <small>/month</small>
                         </div>
-                        <span class="badge"
-                              th:classappend="${room.status == 'Available'} ? 'badge-available' :
-                                                 (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
-                              th:text="${room.status}">Status</span>
                     </div>
+
+                    <!-- TENANT INFO if Occupied -->
+                    <div th:if="${room.status == 'Occupied' and room.currentTenant != null}"
+                         class="tenant-info-box">
+                        <p class="tenant-info-title">🏠 Current Tenant</p>
+                        <p class="tenant-info-detail">
+                            👤 <span th:text="${room.currentTenant.name}">Name</span>
+                        </p>
+                        <p class="tenant-info-detail">
+                            📧 <span th:text="${room.currentTenant.email}">Email</span>
+                        </p>
+                        <p class="tenant-info-detail" th:if="${room.currentTenant.phone != null}">
+                            📞 <span th:text="${room.currentTenant.phone}">Phone</span>
+                        </p>
+                        <p class="tenant-info-detail" th:if="${room.currentTenant.gender != null}">
+                            ⚧ <span th:text="${room.currentTenant.gender}">Gender</span>
+                        </p>
+                    </div>
+
+                    <!-- STATUS CHANGE FORM -->
+                    <form th:action="@{/rooms/{id}/status(id=${room.id})}"
+                          method="post" style="margin-bottom:1rem;"
+                          th:id="'statusForm-' + ${room.id}">
+                        <select name="status"
+                                class="status-select"
+                                th:classappend="${room.status == 'Available'} ? ' status-available' :
+                                                   (${room.status == 'Pending'} ? ' status-pending' : ' status-occupied')"
+                                th:onchange="'handleStatusChange(this, ' + ${room.id} + ')'">
+                            <option value="Available" th:selected="${room.status == 'Available'}">🟢 Available</option>
+                            <option value="Pending" th:selected="${room.status == 'Pending'}">🟡 Pending</option>
+                            <option value="Occupied" th:selected="${room.status == 'Occupied'}">🔴 Not Available</option>
+                        </select>
+
+                        <!-- TENANT EMAIL INPUT — only shown when selecting Occupied -->
+                        <div th:id="'tenantInput-' + ${room.id}"
+                             style="display:none; margin-top:0.5rem;">
+                            <input type="email" name="tenantEmail"
+                                   placeholder="Enter tenant's email"
+                                   style="padding:0.5rem 0.75rem; border:1.5px solid var(--grey-light);
+                                              border-radius:6px; font-size:0.8rem; width:100%;"/>
+                            <button type="submit" class="btn btn-primary"
+                                    style="margin-top:0.5rem; width:100%; justify-content:center;
+                                               padding:0.4rem; font-size:0.8rem;">
+                                Confirm
+                            </button>
+                        </div>
+                    </form>
+
                     <div class="room-card-actions">
                         <a th:href="@{/rooms/{id}(id=${room.id})}"
                            class="btn btn-edit">View</a>
@@ -85,6 +129,7 @@
                     <th>Location</th>
                     <th>Price</th>
                     <th>Status</th>
+                    <th>Tenant Info</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
@@ -96,10 +141,43 @@
                     <td th:text="${room.location}">Location</td>
                     <td>RM <span th:text="${room.price}">0</span></td>
                     <td>
-                                <span class="badge"
-                                      th:classappend="${room.status == 'Available'} ? 'badge-available' :
-                                                     (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
-                                      th:text="${room.status}">Status</span>
+                        <form th:action="@{/rooms/{id}/status(id=${room.id})}"
+                              method="post">
+                            <select name="status"
+                                    class="status-select"
+                                    th:classappend="${room.status == 'Available'} ? ' status-available' :
+                                                           (${room.status == 'Pending'} ? ' status-pending' : ' status-occupied')"
+                                    th:onchange="'handleStatusChange(this, ' + ${room.id} + ')'">
+                                <option value="Available" th:selected="${room.status == 'Available'}">🟢 Available</option>
+                                <option value="Pending" th:selected="${room.status == 'Pending'}">🟡 Pending</option>
+                                <option value="Occupied" th:selected="${room.status == 'Occupied'}">🔴 Not Available</option>
+                            </select>
+
+                            <!-- TENANT EMAIL INPUT -->
+                            <div th:id="'tenantInputList-' + ${room.id}"
+                                 style="display:none; margin-top:0.5rem;">
+                                <input type="email" name="tenantEmail"
+                                       placeholder="Tenant's email"
+                                       style="padding:0.4rem 0.6rem; border:1.5px solid var(--grey-light);
+                                                      border-radius:6px; font-size:0.75rem; width:160px;"/>
+                                <button type="submit" class="btn btn-primary"
+                                        style="padding:0.3rem 0.6rem; font-size:0.7rem; margin-top:0.3rem;">
+                                    Confirm
+                                </button>
+                            </div>
+                        </form>
+                    </td>
+                    <td>
+                        <div th:if="${room.status == 'Occupied' and room.currentTenant != null}">
+                            <div style="font-size:0.8rem; font-weight:600; color:var(--navy);"
+                                 th:text="${room.currentTenant.name}">Name</div>
+                            <div style="font-size:0.75rem; color:var(--grey-mid);"
+                                 th:text="${room.currentTenant.email}">Email</div>
+                            <div style="font-size:0.75rem; color:var(--grey-mid);"
+                                 th:text="${room.currentTenant.phone}">Phone</div>
+                        </div>
+                        <span th:if="${room.status != 'Occupied' or room.currentTenant == null}"
+                              style="color:var(--grey-mid); font-size:0.8rem;">—</span>
                     </td>
                     <td>
                         <div class="action-btns">
@@ -150,7 +228,26 @@
             listBtn.classList.add('active');
         }
     }
+
+    // show tenant email input only when "Occupied" is selected
+    function handleStatusChange(select, roomId) {
+        const value = select.value;
+
+        // grid view input
+        const gridInput = document.getElementById('tenantInput-' + roomId);
+        // list view input
+        const listInput = document.getElementById('tenantInputList-' + roomId);
+
+        if (value === 'Occupied') {
+            if (gridInput) gridInput.style.display = 'block';
+            if (listInput) listInput.style.display = 'block';
+        } else {
+            if (gridInput) gridInput.style.display = 'none';
+            if (listInput) listInput.style.display = 'none';
+            select.form.submit();   // auto submit for Available/Pending
+        }
+    }
 </script>
 
 </body>
-</html>                                                 (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
+</html>

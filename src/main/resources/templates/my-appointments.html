@@ -96,11 +96,25 @@
                 </div>
 
                 <!-- CARD BODY -->
+                <!-- CARD BODY -->
                 <div class="viewing-card-body">
+                    <!-- show tag if this is owner's own room -->
+                    <div th:if="${apt.room.owner.id == loggedInUser.id}"
+                         style="margin-bottom:0.5rem;">
+        <span style="background:var(--mint-pale); color:var(--mint-dark);
+                     padding:2px 10px; border-radius:50px; font-size:0.7rem; font-weight:700;">
+            👑 YOUR ROOM
+        </span>
+                    </div>
                     <div class="viewing-info-row">
                         <span class="viewing-info-label">🏠 Room</span>
                         <span class="viewing-info-value"
                               th:text="${apt.room.title}">Room</span>
+                    </div>
+                    <div class="viewing-info-row" th:if="${apt.room.owner.id == loggedInUser.id}">
+                        <span class="viewing-info-label">👤 Tenant</span>
+                        <span class="viewing-info-value"
+                              th:text="${apt.tenant.name}">Tenant</span>
                     </div>
                     <div class="viewing-info-row">
                         <span class="viewing-info-label">📍 Location</span>

@@ -5,6 +5,8 @@ import GroupProject.Entity.Room;
 import GroupProject.Entity.User;
 import GroupProject.Service.AppointmentService;
 import GroupProject.Service.RoomService;
+import GroupProject.Service.UserService;
+import GroupProject.Service.WishlistService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,6 +27,12 @@ public class RoomController {
     @Autowired
     private AppointmentService appointmentService;
 
+    @Autowired
+    private WishlistService wishlistService;
+
+    @Autowired
+    private UserService userService;
+
     //ROOM DETAIL PAGE
     @GetMapping("/{id}")
     public String roomDetail(@PathVariable Long id, HttpSession session, Model model){
@@ -40,6 +48,7 @@ public class RoomController {
         model.addAttribute("appointments", appointments);
         model.addAttribute("loggedInUser", user);
         model.addAttribute("newAppointment", new Appointment());
+        model.addAttribute("isInWishlist", wishlistService.isSaved(user, room));
         return "room-detail";
     }
 
@@ -98,12 +107,16 @@ public class RoomController {
         User user = (User) session.getAttribute("loggedInUser");
         if (user == null) return "redirect:/login";
 
-        // delete all appointments for this room first
         Room room = roomService.getRoomById(id);
+
+        // delete all appointments for this room first
         List<Appointment> appointments = appointmentService.getAppointmentsByRoom(room);
         for (Appointment apt : appointments) {
             appointmentService.deleteAppointment(apt.getId());
         }
+
+        // delete all wishlist entries for this room
+        wishlistService.deleteByRoom(room);
 
         // then delete the room
         roomService.deleteRoomById(id);
@@ -156,5 +169,39 @@ public class RoomController {
         appointmentService.saveAppointment(appointment);
 
         return "redirect:/rooms/" + id + "?success=true";
+    }
+
+    // CHANGE ROOM STATUS (owner only)
+    @PostMapping("/{id}/status")
+    public String updateStatus(@PathVariable Long id,
+                               @RequestParam String status,
+                               @RequestParam(required = false) String tenantEmail,
+                               HttpSession session) {
+        User user = (User) session.getAttribute("loggedInUser");
+        if (user == null) return "redirect:/login";
+
+        Room room = roomService.getRoomById(id);
+
+        if (!room.getOwner().getId().equals(user.getId())) {
+            return "redirect:/rooms/" + id + "?error=notowner";
+        }
+
+        room.setStatus(status);
+
+        // if marking as Occupied/Not Available, try to link tenant
+        if (status.equals("Occupied") && tenantEmail != null && !tenantEmail.isEmpty()) {
+            User tenant = userService.findByEmail(tenantEmail);
+            if (tenant != null) {
+                room.setCurrentTenant(tenant);
+            }
+        }
+
+        // if marking back as Available, clear tenant
+        if (status.equals("Available")) {
+            room.setCurrentTenant(null);
+        }
+
+        roomService.saveRoom(room);
+        return "redirect:/rooms/my-rooms";
     }
 }

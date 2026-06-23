@@ -40,7 +40,17 @@ public class AppointmentController {
             incomingRequests.addAll(appointmentService.getAppointmentsByRoom(room));
         }
 
-        model.addAttribute("myBookings", myBookings);
+        // CONFIRMED appointments on my rooms also show in "My Bookings"
+        // as a calendar-style event for the owner
+        List<Appointment> confirmedOnMyRooms = incomingRequests.stream()
+                .filter(apt -> apt.getStatus().equals("Confirmed"))
+                .toList();
+
+        // combine: my own tenant bookings + confirmed bookings on my rooms
+        List<Appointment> combinedBookings = new java.util.ArrayList<>(myBookings);
+        combinedBookings.addAll(confirmedOnMyRooms);
+
+        model.addAttribute("myBookings", combinedBookings);
         model.addAttribute("incomingRequests", incomingRequests);
         model.addAttribute("loggedInUser", user);
         return "my-appointments";

@@ -88,6 +88,89 @@
                     <p style="font-size:0.9rem; color:var(--slate); line-height:1.7;"
                        th:text="${room.description}">Description</p>
                 </div>
+
+                <!-- UNIT DETAILS (Whole Unit only) -->
+                <div class="form-group" th:if="${room.type == 'Whole Unit' and (room.bedrooms != null or room.bathrooms != null)}">
+                    <label>Unit Details</label>
+                    <div style="display:flex; gap:1.5rem;">
+        <span th:if="${room.bedrooms != null}" style="font-size:0.875rem; color:var(--slate);">
+            🛏️ <span th:text="${room.bedrooms}">0</span> Bedroom(s)
+        </span>
+                        <span th:if="${room.bathrooms != null}" style="font-size:0.875rem; color:var(--slate);">
+            🚿 <span th:text="${room.bathrooms}">0</span> Bathroom(s)
+        </span>
+                    </div>
+                </div>
+
+                <!-- FACILITIES -->
+                <div class="form-group">
+                    <label>Facilities & Amenities</label>
+                    <div class="facilities-display">
+
+                        <div class="facility-tag" th:if="${room.fullyFurnished != null and room.fullyFurnished}">
+                            <span class="tick">✓</span> Fully Furnished
+                        </div>
+                        <div class="facility-tag" th:if="${room.wifiIncluded != null and room.wifiIncluded}">
+                            <span class="tick">✓</span> WiFi Included
+                        </div>
+                        <div class="facility-tag" th:if="${room.airCond != null and room.airCond}">
+                            <span class="tick">✓</span> Air Conditioning
+                        </div>
+                        <div class="facility-tag" th:if="${room.digitalDoorLock != null and room.digitalDoorLock}">
+                            <span class="tick">✓</span> Digital Door Lock
+                        </div>
+                        <div class="facility-tag" th:if="${room.carPark != null and room.carPark}">
+                            <span class="tick">✓</span> Car Park
+                            <span th:if="${room.carParkLots != null}">
+                (<span th:text="${room.carParkLots}">1</span> lot<span th:if="${room.carParkLots > 1}">s</span>)
+            </span>
+                        </div>
+                        <div class="facility-tag" th:if="${room.privateBathroom != null and room.privateBathroom}">
+                            <span class="tick">✓</span> Private Bathroom
+                        </div>
+                        <div class="facility-tag" th:if="${room.sharedBathroom != null and room.sharedBathroom}">
+                            <span class="tick">✓</span> Shared Bathroom
+                        </div>
+                        <div class="facility-tag" th:if="${room.utilitiesIncluded != null and room.utilitiesIncluded}">
+                            <span class="tick">✓</span> Utilities Included
+                        </div>
+                        <div class="facility-tag" th:if="${room.cookingAllowed != null and room.cookingAllowed}">
+                            <span class="tick">✓</span> Cooking Allowed
+                        </div>
+                        <div class="facility-tag" th:if="${room.petsAllowed != null and room.petsAllowed}">
+                            <span class="tick">✓</span> Pets Allowed
+                        </div>
+                        <div class="facility-tag" th:if="${room.noOwnerStays != null and room.noOwnerStays}">
+                            <span class="tick">✓</span> No Owner Stays
+                        </div>
+                        <div class="facility-tag" th:if="${room.serviceResidence != null and room.serviceResidence}">
+                            <span class="tick">✓</span> Service Residence
+                        </div>
+                        <div class="facility-tag" th:if="${room.waterHeater != null and room.waterHeater}">
+                            <span class="tick">✓</span> Water Heater
+                        </div>
+                        <div class="facility-tag" th:if="${room.washingMachine != null and room.washingMachine}">
+                            <span class="tick">✓</span> Washing Machine
+                        </div>
+
+                    </div>
+
+                    <!-- OTHER FACILITIES -->
+                    <p th:if="${room.otherFacilities != null and !room.otherFacilities.isEmpty()}"
+                       style="font-size:0.875rem; color:var(--slate); margin-top:0.75rem;">
+                        <strong>Other:</strong> <span th:text="${room.otherFacilities}"></span>
+                    </p>
+                </div>
+                <form th:action="@{${isInWishlist} ? '/wishlist/remove/' + room.id : '/wishlist/add/' + room.id}"
+                      method="post" style="display:inline;">
+                    <button type="submit"
+                            class="wishlist-heart"
+                            th:classappend="${isInWishlist} ? 'is-saved' : ''">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21s-6.5-4.35-9.33-8.2C1.1 10.6 1.5 7.4 4 5.6c2-1.4 4.6-1 6.1.9.6.7 1.4 1.9 1.9 2.6.5-.7 1.3-1.9 1.9-2.6 1.5-1.9 4.1-2.3 6.1-.9 2.5 1.8 2.9 5 1.33 7.2C18.5 16.65 12 21 12 21z"/>
+                        </svg>
+                    </button>
+                </form>
             </div>
         </div>
 
@@ -214,6 +297,13 @@
             });
         }
     }
+
+    window.onload = function() {
+    const dateInput = document.getElementById('dateInput');
+    const minDate = new Date();
+    minDate.setDate(minDate.getDate() + 2);  // minimum 2 days from today
+    dateInput.min = minDate.toISOString().split('T')[0];
+}
 
     function pad(n) { return n.toString().padStart(2, '0'); }
 </script>

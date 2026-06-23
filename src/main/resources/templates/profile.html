@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — My Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">My <span>Profile</span></h1>
+        <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+
+    <!-- SUCCESS MESSAGES -->
+    <div class="alert alert-success" th:if="${param.updated}">
+        ✅ Profile updated successfully!
+    </div>
+    <div class="alert alert-success" th:if="${param.passwordChanged}">
+        ✅ Password changed successfully!
+    </div>
+    <div class="alert alert-danger" th:if="${passwordError}" th:text="${passwordError}"></div>
+
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem; max-width:900px;">
+
+        <!-- PROFILE INFO CARD -->
+        <div class="form-card">
+            <h3 class="booking-title" style="margin-bottom:1.25rem;">👤 Profile Information</h3>
+
+            <form th:action="@{/profile/update}" method="post">
+
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                    <label>Full Name</label>
+                    <input type="text" name="name"
+                           th:value="${loggedInUser.name}" required/>
+                </div>
+
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                    <label>Email Address</label>
+                    <input type="email" th:value="${loggedInUser.email}" disabled
+                           style="background:var(--grey-light); cursor:not-allowed;"/>
+                </div>
+
+                <div class="form-group" style="margin-bottom:1.25rem;">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone"
+                           th:value="${loggedInUser.phone}"/>
+                </div>
+
+                <div class="form-group" style="margin-bottom:1.5rem;">
+                    <label>Gender</label>
+                    <select name="gender">
+                        <option value="">-- Select Gender --</option>
+                        <option value="Male" th:selected="${loggedInUser.gender == 'Male'}">Male</option>
+                        <option value="Female" th:selected="${loggedInUser.gender == 'Female'}">Female</option>
+                        <option value="Prefer not to say"
+                                th:selected="${loggedInUser.gender == 'Prefer not to say'}">Prefer not to say</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full">
+                    Save Changes
+                </button>
+
+            </form>
+        </div>
+
+        <!-- PASSWORD + DANGER ZONE -->
+        <div>
+            <!-- RESET PASSWORD CARD -->
+            <div class="form-card" style="margin-bottom:1.5rem;">
+                <h3 class="booking-title" style="margin-bottom:1.25rem;">🔒 Reset Password</h3>
+
+                <form th:action="@{/profile/reset-password}" method="post">
+
+                    <div class="form-group" style="margin-bottom:1.25rem;">
+                        <label>Current Password</label>
+                        <input type="password" name="currentPassword" required/>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:1.5rem;">
+                        <label>New Password</label>
+                        <input type="password" name="newPassword" required/>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-full">
+                        Update Password
+                    </button>
+
+                </form>
+            </div>
+
+            <!-- DANGER ZONE -->
+            <div class="form-card" style="border-left-color:var(--danger);">
+                <h3 class="booking-title" style="margin-bottom:0.75rem; color:var(--danger);">
+                    ⚠️ Danger Zone
+                </h3>
+                <p style="font-size:0.875rem; color:var(--grey-mid); margin-bottom:1.25rem;">
+                    Deleting your account is permanent and cannot be undone.
+                    All your rooms and appointments will be removed.
+                </p>
+                <a href="/profile/delete" class="btn btn-danger btn-full"
+                   onclick="return confirm('Are you absolutely sure? This action cannot be undone!')">
+                    Delete My Account
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

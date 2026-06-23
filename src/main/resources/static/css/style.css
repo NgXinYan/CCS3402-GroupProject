@@ -1224,3 +1224,105 @@ tbody td:first-child { color: var(--navy); font-weight: 600; }
     font-weight: 700;
     font-size: 0.9rem;
 }
+
+/* WISHLIST HEART BUTTON */
+.wishlist-heart {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    width: 38px;
+    height: 38px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    padding: 0;
+}
+
+/* ── WISHLIST HEART ── */
+.room-card-wrapper {
+    position: relative;
+}
+
+.wishlist-heart {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    z-index: 10;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.2s ease;
+}
+
+.wishlist-heart:hover {
+    transform: scale(1.15);
+}
+
+.wishlist-heart.saved {
+    background: white;
+}
+
+/* ── STATUS SELECT DROPDOWN ── */
+.status-select {
+    padding: 0.4rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+}
+
+.status-available {
+    background: var(--success-pale);
+    color: var(--success);
+}
+
+.status-pending {
+    background: var(--warning-pale);
+    color: var(--warning);
+}
+
+.status-occupied {
+    background: var(--danger-pale);
+    color: var(--danger);
+}
+
+/* ── TENANT INFO BOX (my-rooms) ── */
+.tenant-info-box {
+    background: var(--mint-light);
+    border: 1px solid var(--mint);
+    border-radius: 8px;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.tenant-info-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--mint-dark);
+    margin-bottom: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tenant-info-detail {
+    font-size: 0.8rem;
+    color: var(--slate);
+    margin-bottom: 0.2rem;
+}

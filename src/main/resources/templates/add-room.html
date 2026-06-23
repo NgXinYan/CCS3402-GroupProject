@@ -70,7 +70,7 @@
                     <select th:field="*{status}">
                         <option value="Available">Available</option>
                         <option value="Pending">Pending</option>
-                        <option value="Occupied">Occupied</option>
+                        <option value="Occupied">Not Available (Rental Out)</option>
                     </select>
                 </div>
             </div>
@@ -187,7 +187,7 @@
             </div>
 
             <!-- Car park lots -->
-            <div class="form-group" style="margin-top:1rem; max-width:200px;"
+            <div class="form-group" style="margin-top:1rem; max-width:200px; display:none;"
                  id="carParkLots">
                 <label>Number of Car Park Lots</label>
                 <input type="number" th:field="*{carParkLots}"
@@ -219,17 +219,26 @@
 <div th:replace="~{fragments/footer :: footer}"></div>
 
 <script>
-    // show unit fields only for Whole Unit type
-    function toggleUnitFields(select) {
+    function toggleUnitFields(select){
         const unitFields = document.getElementById('unitFields');
-        unitFields.style.display =
-            select.value === 'Whole Unit' ? 'block' : 'none';
+        unitFields.style.display = select.value === 'Whole Unit' ? 'block' : 'none';
     }
 
-    // init on page load for edit mode
-    window.onload = function() {
+    function toggleCarParkLots(){
+        const carParkCheckbox = document.querySelector('input[name="carPark"]');
+        const carParkLots = document.getElementById('carParkLots');
+        carParkLots.style.display = carParkCheckbox.checked ? 'block' : 'none';
+    }
+
+     window.onload = function() {
         const typeSelect = document.querySelector('select[name="type"]');
         if (typeSelect) toggleUnitFields(typeSelect);
+
+        const carParkCheckbox = document.querySelector('input[name="carPark"]');
+        if (carParkCheckbox) {
+            toggleCarParkLots();
+            carParkCheckbox.addEventListener('change', toggleCarParkLots);
+        }
     }
 </script>
 

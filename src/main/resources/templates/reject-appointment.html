@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — Reject Appointment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">Reject <span>Appointment</span></h1>
+        <a href="/appointments/my" class="btn btn-secondary">← Back</a>
+    </div>
+
+    <div class="form-card">
+
+        <!-- APPOINTMENT INFO -->
+        <div style="background:var(--off-white); padding:1rem; border-radius:8px; margin-bottom:1.5rem;">
+            <p style="font-size:0.875rem; color:var(--grey-mid);">Tenant</p>
+            <p style="font-weight:600; color:var(--navy); margin-bottom:0.5rem;"
+               th:text="${appointment.tenant.name}">Tenant</p>
+            <p style="font-size:0.875rem; color:var(--grey-mid);">Requested Time</p>
+            <p style="font-weight:600; color:var(--navy);"
+               th:text="${#temporals.format(appointment.dateTime, 'dd MMM yyyy, hh:mm a')}">Date</p>
+        </div>
+
+        <form th:action="@{/appointments/reject/{id}(id=${appointment.id})}" method="post">
+
+            <div class="form-group" style="margin-bottom:1.25rem;">
+                <label>Reason for Rejection</label>
+                <select name="reason" id="reasonSelect" onchange="toggleTimeRange()" required>
+                    <option value="">-- Select Reason --</option>
+                    <option value="Time not suitable">Time not suitable</option>
+                    <option value="Room no longer available">Room no longer available</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- custom reason text -->
+            <div class="form-group" id="customReasonField" style="margin-bottom:1.25rem; display:none;">
+                <label>Please specify</label>
+                <textarea name="reason" placeholder="Write your reason..."></textarea>
+            </div>
+
+            <!-- suggested time range -->
+            <div id="timeRangeFields" style="display:none;">
+                <div class="form-grid" style="margin-bottom:1.25rem;">
+                    <div class="form-group">
+                        <label>Suggested Time From</label>
+                        <input type="datetime-local" name="suggestedTimeFrom"/>
+                    </div>
+                    <div class="form-group">
+                        <label>Suggested Time To</label>
+                        <input type="datetime-local" name="suggestedTimeTo"/>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">
+                    Confirm Rejection
+                </button>
+                <a href="/appointments/my" class="btn btn-secondary">Cancel</a>
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+    function toggleTimeRange() {
+        const reason = document.getElementById('reasonSelect').value;
+        const timeRangeFields = document.getElementById('timeRangeFields');
+        const customReasonField = document.getElementById('customReasonField');
+        const reasonSelect = document.getElementById('reasonSelect');
+
+        timeRangeFields.style.display =
+            reason === 'Time not suitable' ? 'block' : 'none';
+
+        if (reason === 'Other') {
+            customReasonField.style.display = 'block';
+            reasonSelect.removeAttribute('name');  // disable select name so textarea name is used
+        } else {
+            customReasonField.style.display = 'none';
+            reasonSelect.setAttribute('name', 'reason');
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — My Wishlist</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">My <span>Wishlist</span></h1>
+        <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+
+    <!-- WISHLIST GRID -->
+    <div class="room-grid" th:if="${!rooms.isEmpty()}">
+        <div th:each="room : ${rooms}" class="room-card-wrapper">
+
+            <!-- HEART ICON — always filled since it's in wishlist -->
+            <a th:href="@{/wishlist/toggle/{id}(id=${room.id})}"
+               class="wishlist-heart saved"
+               onclick="event.stopPropagation();">
+                ❤️
+            </a>
+
+            <a th:href="@{/rooms/{id}(id=${room.id})}" class="room-card">
+                <div class="room-card-img">
+                    <span class="room-type-badge" th:text="${room.type}">Type</span>
+                </div>
+                <div class="room-card-body">
+                    <h3 class="room-card-title" th:text="${room.title}">Title</h3>
+                    <p class="room-card-location">
+                        📍 <span th:text="${room.location}">Location</span>
+                    </p>
+                    <p class="room-card-desc" th:text="${room.description}">Description</p>
+                    <div class="room-card-footer">
+                        <div class="room-card-price">
+                            RM <span th:text="${room.price}">0</span>
+                            <small>/month</small>
+                        </div>
+                        <span class="badge"
+                              th:classappend="${room.status == 'Available'} ? 'badge-available' :
+                                                 (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
+                              th:text="${room.status}">Status</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" th:if="${rooms.isEmpty()}">
+        <div class="empty-icon">💔</div>
+        <p>You haven't saved any rooms yet. Tap the heart icon on a room to save it!</p>
+        <a href="/dashboard" class="btn btn-primary">Browse Rooms</a>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>
