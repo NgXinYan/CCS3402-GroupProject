@@ -113,8 +113,10 @@
                     </div>
                     <div class="viewing-info-row" th:if="${apt.room.owner.id == loggedInUser.id}">
                         <span class="viewing-info-label">👤 Tenant</span>
-                        <span class="viewing-info-value"
-                              th:text="${apt.tenant.name}">Tenant</span>
+                        <a th:href="@{/profile/user/{id}(id=${apt.tenant.id})}"
+                           class="viewing-info-value"
+                           style="color:#2bb87a; text-decoration:none !important;"
+                           th:text="${apt.tenant.name}">Tenant</a>
                     </div>
                     <div class="viewing-info-row">
                         <span class="viewing-info-label">📍 Location</span>
@@ -194,8 +196,9 @@
                     <td th:text="${stat.index + 1}">1</td>
                     <td th:text="${apt.room.title}">Room</td>
                     <td>
-                        <div style="font-weight:600; color:var(--navy);"
-                             th:text="${apt.tenant.name}">Name</div>
+                        <a th:href="@{/profile/user/{id}(id=${apt.tenant.id})}"
+                           style="font-weight:600; color:#2bb87a; text-decoration:none !important; display:block; margin-bottom:0.25rem;"
+                           th:text="${apt.tenant.name}">Name</a>
                         <div style="font-size:0.775rem; color:var(--grey-mid);"
                              th:text="${apt.tenant.email}">Email</div>
                         <div style="font-size:0.775rem; color:var(--grey-mid);"

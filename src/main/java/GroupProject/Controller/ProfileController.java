@@ -41,6 +41,26 @@ public class ProfileController {
         return "profile";
     }
 
+    // SHOW public profile page
+    @GetMapping("/user/{id}")
+    public String showPublicProfile(@PathVariable Long id, HttpSession session, Model model) {
+        User loggedInUser = (User) session.getAttribute("loggedInUser");
+        if (loggedInUser == null) return "redirect:/login";
+
+        User targetUser = userService.getUserById(id);
+        if (targetUser == null) {
+            return "redirect:/dashboard";
+        }
+
+        List<Room> targetUserRooms = roomService.getRoomsByOwner(targetUser);
+
+        model.addAttribute("loggedInUser", loggedInUser);
+        model.addAttribute("targetUser", targetUser);
+        model.addAttribute("userRooms", targetUserRooms);
+
+        return "public-profile";
+    }
+
     // UPDATE profile info (name, phone, gender)
     @PostMapping("/update")
     public String updateProfile(@RequestParam String name,

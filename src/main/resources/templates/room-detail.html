@@ -77,8 +77,10 @@
                     </div>
                     <div class="room-meta-row">
                         <span class="room-meta-label">👤 Owner</span>
-                        <span class="room-meta-value"
-                              th:text="${room.owner.name}">Owner</span>
+                        <a th:href="@{/profile/user/{id}(id=${room.owner.id})}"
+                           class="room-meta-value"
+                           style="color:#2bb87a; text-decoration:none !important;"
+                           th:text="${room.owner.name}">Owner</a>
                     </div>
                 </div>
 
@@ -233,8 +235,9 @@
                          style="padding:0.75rem 0; border-bottom:1px solid var(--grey-light);">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
                             <div>
-                                <p style="font-size:0.875rem; font-weight:600; color:var(--navy);"
-                                   th:text="${apt.tenant.name}">Tenant</p>
+                                <a th:href="@{/profile/user/{id}(id=${apt.tenant.id})}"
+                                   style="font-size:0.875rem; font-weight:600; color:#2bb87a; text-decoration:none !important; display:block; margin-bottom:0.15rem;"
+                                   th:text="${apt.tenant.name}">Tenant</a>
                                 <p style="font-size:0.8rem; color:var(--grey-mid);"
                                    th:text="${#temporals.format(apt.dateTime, 'dd MMM yyyy, hh:mm a')}">Date</p>
                             </div>

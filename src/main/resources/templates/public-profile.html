@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>RoomEstate — Public Profile</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}"/>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<div th:replace="~{fragments/navbar :: navbar}"></div>
+
+<div class="main-content">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <h1 class="page-title">User <span>Profile</span></h1>
+        <a href="/dashboard" class="btn btn-secondary">← Back to Dashboard</a>
+    </div>
+
+    <div class="form-card" style="margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="font-size: 3rem;">👤</div>
+            <div>
+                <h2 style="color: var(--navy); margin-bottom: 0.25rem;" th:text="${targetUser.name}">Name</h2>
+                <p style="color: var(--grey-mid); font-size: 0.875rem;">Member of RoomEstate</p>
+            </div>
+        </div>
+        
+        <div class="room-detail-meta" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="room-meta-row">
+                <span class="room-meta-label">✉️ Email</span>
+                <span class="room-meta-value" th:text="${targetUser.email}">Email</span>
+            </div>
+            <div class="room-meta-row" th:if="${targetUser.phone != null and !targetUser.phone.isEmpty()}">
+                <span class="room-meta-label">📞 Phone</span>
+                <span class="room-meta-value" th:text="${targetUser.phone}">Phone</span>
+            </div>
+            <div class="room-meta-row" th:if="${targetUser.gender != null and !targetUser.gender.isEmpty()}">
+                <span class="room-meta-label">⚧ Gender</span>
+                <span class="room-meta-value" th:text="${targetUser.gender}">Gender</span>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="page-title" style="font-size: 1.5rem; margin-bottom: 1.5rem;">Published <span>Rooms</span></h2>
+
+    <div class="room-grid" th:if="${!userRooms.isEmpty()}">
+        <div th:each="room : ${userRooms}" class="room-card-wrapper">
+
+            <a th:href="@{/rooms/{id}(id=${room.id})}" class="room-card">
+                <div class="room-card-img">
+                    <span class="room-type-badge" th:text="${room.type}">Type</span>
+                </div>
+                <div class="room-card-body">
+                    <h3 class="room-card-title" th:text="${room.title}">Title</h3>
+                    <p class="room-card-location">
+                        📍 <span th:text="${room.location}">Location</span>
+                    </p>
+                    <p class="room-card-desc" th:text="${room.description}">Description</p>
+                    <div class="room-card-footer">
+                        <div class="room-card-price">
+                            RM <span th:text="${room.price}">0</span>
+                            <small>/month</small>
+                        </div>
+                        <span class="badge"
+                              th:classappend="${room.status == 'Available'} ? 'badge-available' :
+                                     (${room.status == 'Pending'} ? 'badge-pending' : 'badge-occupied')"
+                              th:text="${room.status}">Status</span>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- EMPTY STATE -->
+    <div class="empty-state" th:if="${userRooms.isEmpty()}">
+        <div class="empty-icon">🏠</div>
+        <p>This user has not published any rooms yet.</p>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>
