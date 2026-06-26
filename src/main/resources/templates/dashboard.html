@@ -227,7 +227,7 @@
                         <p class="room-card-desc" th:classappend="${room.description == null or room.description.isEmpty()} ? 'text-muted' : ''" th:text="${room.description != null and !room.description.isEmpty()} ? ${room.description} : 'There is no description for this room yet.'"></p>
                         <div class="room-card-footer">
                             <div class="room-card-price">
-                                RM <span th:text="${room.price}">0</span>
+                                RM <span th:text="${#numbers.formatDecimal(room.price, 1, 2)}">0.00</span>
                                 <small>/month</small>
                             </div>
                             <span class="badge"
@@ -269,7 +269,7 @@
                     <td th:text="${room.title}">Title</td>
                     <td th:text="${room.type}">Type</td>
                     <td th:text="${room.location}">Location</td>
-                    <td>RM <span th:text="${room.price}">0</span></td>
+                    <td>RM <span th:text="${#numbers.formatDecimal(room.price, 1, 2)}">0.00</span></td>
                     <td>
                                 <span class="badge"
                                       th:classappend="${room.status == 'Available'} ? 'badge-available' :
