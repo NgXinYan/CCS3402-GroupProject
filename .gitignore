@@ -1,5 +1,7 @@
 HELP.md
 PLAN.md
+DESIGN.md
+mvc_architecture.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
