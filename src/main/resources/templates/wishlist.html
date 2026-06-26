@@ -44,7 +44,7 @@
                     <p class="room-card-desc" th:classappend="${room.description == null or room.description.isEmpty()} ? 'text-muted' : ''" th:text="${room.description != null and !room.description.isEmpty()} ? ${room.description} : 'There is no description for this room yet.'"></p>
                     <div class="room-card-footer">
                         <div class="room-card-price">
-                            RM <span th:text="${room.price}">0</span>
+                            RM <span th:text="${#numbers.formatDecimal(room.price, 1, 2)}">0.00</span>
                             <small>/month</small>
                         </div>
                         <span class="badge"

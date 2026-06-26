@@ -126,7 +126,7 @@
                     <div class="viewing-info-row">
                         <span class="viewing-info-label"><i class="fa-solid fa-money-bill"></i> Price</span>
                         <span class="viewing-info-value">
-                                RM <span th:text="${apt.room.price}">0</span>/month
+                                RM <span th:text="${#numbers.formatDecimal(apt.room.price, 1, 2)}">0.00</span>/month
                             </span>
                     </div>
                     <div class="viewing-info-row"
